@@ -1,13 +1,32 @@
 name: Build Signed Release APK
+
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+
+      - name: Get dependencies
+        run: flutter pub get
 
       - name: Decode Keystore
         run: |
@@ -18,27 +37,13 @@ jobs:
           echo "storePassword=${{ secrets.KEYSTORE_STORE_PASSWORD }}" > android/key.properties
           echo "keyPassword=${{ secrets.KEYSTORE_KEY_PASSWORD }}" >> android/key.properties
           echo "keyAlias=${{ secrets.KEYSTORE_KEY_ALIAS }}" >> android/key.properties
-          echo "storeFile=keystore.jks" >> android/key.properties
+          echo "storeFile=app/keystore.jks" >> android/key.properties
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-            - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.22.0'
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build APK
+      - name: Build Release APK
         run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: signed-release
+          name: signed-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
