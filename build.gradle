@@ -37,7 +37,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.body_size_scanner"
-        // google_mlkit_pose_detection requires minSdk 21+; we set 23 for
+        // google_mlkit_pose_detection requires minSdk 21+: we set 23 for
         // stable performance of the "accurate" pose model on real devices.
         minSdkVersion 23
         targetSdkVersion 34
@@ -46,13 +46,21 @@ android {
         multiDexEnabled true
     }
 
+    signingConfigs {
+        release {
+            storeFile file("keystore.jks")
+            storePassword System.getenv("KEYSTORE_STORE_PASSWORD")
+            keyAlias System.getenv("KEYSTORE_KEY_ALIAS")
+            keyPassword System.getenv("KEYSTORE_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: replace with your own signing config before publishing.
-            signingConfig signingConfigs.debug
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
